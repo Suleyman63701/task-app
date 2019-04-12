@@ -42,10 +42,15 @@ router.get('/tasks/:id',async (req,res)=>{
 })
 
 router.patch('/tasks/:id', async(req,res)=>{
+        const updates=Object.keys(req.body)
+        const allowedUpdates=['email','description']
         const _id=req.params.id
+        const isAllowed=updates.every((update)=>{
+            return allowedUpdates.includes(update)
+        })
         
-        if(!_id){
-            res.status(504).send("Cant find ID")
+        if(!isAllowed){
+            res.status(504).send("Can't complete update")
         }
     try{
        const patchObj={completed:req.body}
@@ -56,6 +61,21 @@ router.patch('/tasks/:id', async(req,res)=>{
            res.status(200).send(task)
     }catch(e){
            res.status(404).send(e)
+    }
+    
+})
+
+router.delete('/tasks/:id', async(req,res)=>{
+
+    try{
+        const _id=req.params.id
+        if(!_id){
+           return res.status(404).send('Invalid Entry')
+        }
+        const task=await Task.findByIdAndDelete(_id)
+        res.status(200).send(task)
+    }catch(e){
+        res.status(500).send(e)
     }
     
 })
